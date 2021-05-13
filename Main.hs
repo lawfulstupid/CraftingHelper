@@ -108,13 +108,13 @@ getRecipes targetItem book = simplifyOptions <$> Map.lookup targetItem book
       zeroCost = filter (null . inputs) rs
       in if null zeroCost then rs else zeroCost
 
-craft :: Item -> Quantity -> RecipeBook -> [CraftTree]
-craft targetItem targetQuantity book = case getRecipes targetItem book of
+craft :: ItemStack -> RecipeBook -> [CraftTree]
+craft target book = case getRecipes (item target) book of
    Nothing -> []
    Just recipes -> do
       recipe <- recipes
-      let targetInputQuantity = \input -> (quantity input) * targetQuantity / (quantity $ output recipe)
-      let craftInput = \input -> craft (item input) (targetInputQuantity input) book
+      let targetInputQuantity = \input -> (quantity input) * (quantity target) / (quantity $ output recipe)
+      let craftInput = \input -> craft (input {quantity = targetInputQuantity input}) book
       let inputTrees = map craftInput $ inputs recipe :: [[CraftTree]]
       craftedInputs <- if null inputTrees then [[]] else sequence inputTrees
-      pure $ Tree (ItemStack targetItem targetQuantity) craftedInputs
+      pure $ Tree target craftedInputs
