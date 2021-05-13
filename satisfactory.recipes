@@ -1,0 +1,47 @@
+# BASIC INPUTS
+=> 1 Steel Beam
+=> 1 Steel Pipe
+=> 1 Concrete
+=> 1 Iron Plate
+=> 1 Screw
+=> 1 Iron Rod
+=> 1 Wire
+=> 1 Cable
+=> 1 Copper Sheet
+=> 1 Rubber
+=> 1 Plastic
+
+# REFERENCE
+1 Iron Rod => 4 Screw @40
+
+# GOALS
+1 Modular Frame + 12 Steel Beam => 2 Versatile Framework @5
+2 Motor + 15 Rubber + 2 Smart Plating => 1 Modular Engine @1
+15 Automated Wiring + 10 Circuit Board + 2 Heavy Modular Frame + 2 Computer => 2 Adaptive Control Unit @1
+
+# INTERMEDIARY PARTS
+10 Circuit Board + 9 Cable + 18 Plastic + 52 Screw => 1 Computer @2.5
+2 Copper Sheet + 4 Plastic => 1 Circuit Board @7.5
+5 Modular Frame + 15 Steel Pipe + 5 Encased Industrial Beam + 100 Screw => 1 Heavy Modular Frame @2
+8 Modular Frame + 10 Encased Industrial Beam + 36 Steel Pipe + 22 Concrete => 3 Heavy Modular Frame @2.812
+4 Steel Beam + 5 Concrete => 1 Encased Industrial Beam @6
+3 Reinforced Iron Plate + 12 Iron Rod => 2 Modular Frame @2
+3 Reinforced Iron Plate + 56 Screw => 2 Modular Frame @5
+6 Iron Plate + 12 Screw => 1 Reinforced Iron Plate @5
+# 18 Iron Plate + 50 Screw => 3 Reinforced Iron Plate @15
+10 Iron Plate + 20 Wire => 3 Reinforced Iron Plate @5.625
+1 Stator + 20 Cable => 1 Automated Wiring @2.5
+1 Reinforced Iron Plate + 1 Rotor => 1 Smart Plating @2
+2 Rotor + 2 Stator => 1 Motor @5
+3 Rotor + 3 Stator + 1 Crystal Oscillator => 6 Motor @7.5
+36 Quartz Crystal + 28 Cable + 5 Reinforced Iron Plate => 2 Crystal Oscillator @1
+5 Raw Quartz => 3 Quartz Crystal @22.5
+
+5 Iron Rod + 25 Screw => 1 Rotor @4
+2 Steel Pipe + 6 Wire => 1 Rotor @5
+6 Copper Sheet + 52 Screw => 3 Rotor @11.25
+3 Steel Pipe + 8 Wire => 1 Stator @5
+4 Steel Pipe + 15 Quickwire => 2 Stator @8
+
+1 Caterium Ingot => 5 Quickwire @60
+3 Caterium Ore => 1 Caterium Ingot @15
