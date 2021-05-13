@@ -16,15 +16,15 @@ import qualified Data.Map.Strict as Map
 ----- PARSING -----
 
 type Item = String
-data ItemStack = ItemStack Item Integer
-item (ItemStack i _) = i
-quantity (ItemStack _ n) = fromIntegral n
+data ItemStack = ItemStack
+   { item :: Item
+   , quantity :: Rational }
 
 type Rate = Rational
 
 data Recipe = Recipe
    { inputs :: [ItemStack]
-   , outputs :: [ItemStack]
+   , output :: ItemStack
    , rate :: Rate }
 
 type RecipeBook = Map Item [Recipe]
@@ -32,9 +32,8 @@ type RecipeBook = Map Item [Recipe]
 instance Show Recipe where
    show (Recipe i o r) = let
       inputs = intercalate " + " $ map show i
-      outputs = intercalate " + " $ map show o
       rate = " @ " ++ show r
-      in inputs ++ " => " ++ outputs ++ rate
+      in inputs ++ " => " ++ show o ++ rate
 
 instance Show ItemStack where
    show (ItemStack s n) = show n ++ " " ++ s
@@ -46,10 +45,10 @@ parseRecipe :: Parser Recipe
 parseRecipe = do
    inputs <- greedy parseItemStackList
    optional ws >> match "=>" >> optional ws
-   outputs <- greedy parseItemStackList
+   output <- parseItemStack
    optional ws
    rate <- pure 1 <|> parseRate
-   pure (Recipe inputs outputs rate)
+   pure (Recipe inputs output rate)
 
 instance Parse ItemStack where
    parser = parseItemStack
@@ -58,7 +57,7 @@ parseItemStack :: Parser ItemStack
 parseItemStack = do
    c <- peek next
    guard (c /= ' ')
-   n <- reader -- integer
+   n <- parser -- rational
    words <- greedy $ some (ws >> parseWord)
    let s = intercalate " " words
    pure (ItemStack s n)
@@ -93,7 +92,7 @@ loadRecipes file = do
       pure trimmedLine
    
    aux :: Recipe -> RecipeBook -> RecipeBook
-   aux r b = foldr (Map.alter $ append r) b (map item $ outputs r)
+   aux r b = Map.alter (append r) (item $ output r) b
    
    append :: Recipe -> Maybe [Recipe] -> Maybe [Recipe]
    append r rs = Just (r : fromMaybe [] rs)
@@ -120,10 +119,8 @@ craftAtRate targetItem targetRate book = case getRecipes targetItem book of
    Nothing -> []
    Just recipes -> do
       recipe <- recipes
-      let output = head $ filter ((targetItem ==) . item) $ outputs recipe
-      let targetInputRate = \input -> (quantity input) * targetRate / (quantity output)
+      let targetInputRate = \input -> (quantity input) * targetRate / (quantity $ output recipe)
       let craftInput = \input -> craftAtRate (item input) (targetInputRate input) book
       let inputTrees = map craftInput $ inputs recipe :: [[CraftTree]]
       craftedInputs <- if null inputTrees then [[]] else sequence inputTrees
       pure $ Tree (CraftItem targetItem targetRate) craftedInputs
-      
