@@ -18,25 +18,21 @@ import qualified Data.Map.Strict as Map
 type Item = String
 data ItemStack = ItemStack
    { item :: Item
-   , quantity :: Rational }
+   , quantity :: Quantity }
 
-type Rate = Rational
+type Quantity = Rational
 
 data Recipe = Recipe
    { inputs :: [ItemStack]
-   , output :: ItemStack
-   , rate :: Rate }
+   , output :: ItemStack }
 
 type RecipeBook = Map Item [Recipe]
 
 instance Show Recipe where
-   show (Recipe i o r) = let
-      inputs = intercalate " + " $ map show i
-      rate = " @ " ++ show r
-      in inputs ++ " => " ++ show o ++ rate
+   show (Recipe i o) = (intercalate " + " $ map show i) ++ " => " ++ show o
 
 instance Show ItemStack where
-   show (ItemStack s n) = show n ++ " " ++ s
+   show (ItemStack s n) = show (fromRational n) ++ " " ++ s
 
 instance Parse Recipe where
    parser = parseRecipe
@@ -47,8 +43,10 @@ parseRecipe = do
    optional ws >> match "=>" >> optional ws
    output <- parseItemStack
    optional ws
-   rate <- pure 1 <|> parseRate
-   pure (Recipe inputs output rate)
+   maybeRate <- optional parseRate
+   let qMult = maybe 1 (/ quantity output) maybeRate
+   let qAlt = \s -> s {quantity = qMult * quantity s}
+   pure $ Recipe (map qAlt inputs) (qAlt output)
 
 instance Parse ItemStack where
    parser = parseItemStack
@@ -71,7 +69,7 @@ parseItemStackList = pure [] <|> do
 parseWord :: Parser String
 parseWord = greedy $ some letter
 
-parseRate :: Parser Rate
+parseRate :: Parser Rational
 parseRate = match "@" >> optional ws >> parser
 
 ----- FILE READING -----
@@ -100,11 +98,7 @@ loadRecipes file = do
 
 ----- CRAFTING LOGIC -----
 
-data CraftItem = CraftItem Item Rate
-instance Show CraftItem where
-   show (CraftItem item rate) = item ++ " @" ++ show (fromRational rate)
-
-type CraftTree = Tree CraftItem
+type CraftTree = Tree ItemStack
 
 getRecipes :: Item -> RecipeBook -> Maybe [Recipe]
 getRecipes targetItem book = simplifyOptions <$> Map.lookup targetItem book
@@ -114,13 +108,13 @@ getRecipes targetItem book = simplifyOptions <$> Map.lookup targetItem book
       zeroCost = filter (null . inputs) rs
       in if null zeroCost then rs else zeroCost
 
-craftAtRate :: Item -> Rate -> RecipeBook -> [CraftTree]
-craftAtRate targetItem targetRate book = case getRecipes targetItem book of
+craft :: Item -> Quantity -> RecipeBook -> [CraftTree]
+craft targetItem targetQuantity book = case getRecipes targetItem book of
    Nothing -> []
    Just recipes -> do
       recipe <- recipes
-      let targetInputRate = \input -> (quantity input) * targetRate / (quantity $ output recipe)
-      let craftInput = \input -> craftAtRate (item input) (targetInputRate input) book
+      let targetInputQuantity = \input -> (quantity input) * targetQuantity / (quantity $ output recipe)
+      let craftInput = \input -> craft (item input) (targetInputQuantity input) book
       let inputTrees = map craftInput $ inputs recipe :: [[CraftTree]]
       craftedInputs <- if null inputTrees then [[]] else sequence inputTrees
-      pure $ Tree (CraftItem targetItem targetRate) craftedInputs
+      pure $ Tree (ItemStack targetItem targetQuantity) craftedInputs
