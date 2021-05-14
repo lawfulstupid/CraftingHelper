@@ -44,12 +44,12 @@ loadRecipes file = do
    aux r m = Map.alter (append r) (item $ output r) m
    
    append :: Recipe -> Maybe [Recipe] -> Maybe [Recipe]
-   append r rs = Just (r : fromMaybe [] rs)
+   append r rs = Just $ simplifyRecipes (r : fromMaybe [] rs)
 
-getRecipes :: Item -> RecipeBook -> [Recipe]
-getRecipes targetItem (RB m) = simplifyOptions $ concat $ maybeToList $ Map.lookup targetItem m
-   where
-   simplifyOptions :: [Recipe] -> [Recipe]
-   simplifyOptions rs = let
+   simplifyRecipes :: [Recipe] -> [Recipe]
+   simplifyRecipes rs = let
       zeroCost = filter (null . inputs) rs
       in if null zeroCost then rs else zeroCost
+
+getRecipes :: Item -> RecipeBook -> [Recipe]
+getRecipes targetItem (RB m) = concat $ maybeToList $ Map.lookup targetItem m
