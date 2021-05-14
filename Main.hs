@@ -11,6 +11,7 @@ import AbLib.Control.ParserUtils
 import AbLib.Data.Tree
 import AbLib.Data.List
 import AbLib.Data.Indexed
+import AbLib.Data.IO
 
 import GHC.IO
 import Data.Maybe
@@ -64,6 +65,29 @@ craft target book = case getRecipes (item target) book of
       let inputTrees = map craftInput $ inputs recipe :: [[CraftTree]]
       craftedInputs <- if null inputTrees then [[]] else sequence inputTrees
       pure $ Tree target craftedInputs
+
+--------------------------------------------------------------------------------
+
+type RecipeSelection = Map Item (IO Recipe)
+
+makeRecipeSelection :: RecipeBook -> RecipeSelection
+makeRecipeSelection = Map.map selectRecipe
+   selectRecipe :: [Recipe] -> IO Recipe
+   selectRecipe rs | length rs == 1 = pure (head rs)
+   selectRecipe rs = do
+      forM_ (zip [1..] rs) $ \(n,r) -> do
+         putStr "("
+         putStr (show n)
+         putStr ")  "
+         print r
+      putStr "Selection: "
+      k <- read . pure <$> getKey
+      case rs !? (k - 1) of
+         Just r -> pure r
+         Nothing -> do {putStrLn "invalid, try again\n" >> selectRecipe rs}
+
+craftOne :: ItemStack -> RecipeBook -> IO [CraftTree]
+craftOne target book = undefined
 
 --------------------------------------------------------------------------------
 
