@@ -67,30 +67,30 @@ craft target book = case getRecipes (item target) book of
 
 --------------------------------------------------------------------------------
 
-type CraftLayer = [ItemStack]
-data LayerPointer = LayerPointer
-   { layer :: Int
+type CraftStage = [ItemStack]
+data StagePointer = StagePointer
+   { stage :: Int
    , stack :: ItemStack }
 
-craftStages :: Forest ItemStack -> [CraftLayer]
+craftStages :: Forest ItemStack -> [CraftStage]
 craftStages = mapToLayers . pointersToMap . forestToPointers
    where
-   insertLayerPointer :: LayerPointer -> Map String LayerPointer -> Map String LayerPointer
-   insertLayerPointer ptr = Map.alter (Just . maybe ptr (mergePointers ptr)) (item $ stack ptr)
+   insertStagePointer :: StagePointer -> Map String StagePointer -> Map String StagePointer
+   insertStagePointer ptr = Map.alter (Just . maybe ptr (mergePointers ptr)) (item $ stack ptr)
    
-   mergePointers :: LayerPointer -> LayerPointer -> LayerPointer
-   mergePointers (LayerPointer layer1 stack1) (LayerPointer layer2 stack2) = LayerPointer (max layer1 layer2) (stack1 + stack2)
+   mergePointers :: StagePointer -> StagePointer -> StagePointer
+   mergePointers (StagePointer stage1 stack1) (StagePointer stage2 stack2) = StagePointer (max stage1 stage2) (stack1 + stack2)
    
-   mapToLayers :: Map String LayerPointer -> [CraftLayer]
-   mapToLayers = map (map stack) . groupOn layer . sortOn layer . Map.elems
+   mapToLayers :: Map String StagePointer -> [CraftStage]
+   mapToLayers = map (map stack) . groupOn stage . sortOn stage . Map.elems
 
-   pointersToMap :: [LayerPointer] -> Map String LayerPointer
-   pointersToMap = foldr insertLayerPointer Map.empty
+   pointersToMap :: [StagePointer] -> Map String StagePointer
+   pointersToMap = foldr insertStagePointer Map.empty
 
-   forestToPointers :: Forest ItemStack -> [LayerPointer]
+   forestToPointers :: Forest ItemStack -> [StagePointer]
    forestToPointers [] = []
    forestToPointers forest = let
       thisLayer = map node forest
       nextForest = foldMap branches forest
-      nextOutput = map (\ptr -> ptr {layer = layer ptr + 1}) $ forestToPointers nextForest
-      in map (LayerPointer 0) thisLayer ++ nextOutput
+      nextOutput = map (\ptr -> ptr {stage = stage ptr + 1}) $ forestToPointers nextForest
+      in map (StagePointer 0) thisLayer ++ nextOutput
