@@ -9,6 +9,7 @@ import AbLib.Data.Tree
 import AbLib.Data.List
 import AbLib.Data.Indexed
 
+import Control.Monad
 import Data.List
 
 import Data.Map.Strict (Map)
@@ -50,3 +51,16 @@ craftStages = mapToLayers . pointersToMap . forestToPointers
       nextForest = foldMap branches forest
       nextOutput = map increment $ forestToPointers nextForest
       in map (Index 0) thisLayer ++ nextOutput
+
+printStages :: Forest ItemStack -> IO ()
+printStages forest = forM_ (zip [1..] $ reverse $ craftStages forest) $ \(stage, materials) -> do
+   putStrLn ("STAGE " ++ show stage ++ ":")
+   forM_ materials print
+   putStrLn ""
+
+fullPlan :: FilePath -> [ItemStack] -> IO ()
+fullPlan file targets = do
+   selector <- make file :: IO RecipeSelector
+   forest <- sequence $ map (flip craft selector) targets
+   printStages forest
+   
