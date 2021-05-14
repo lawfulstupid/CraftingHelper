@@ -65,7 +65,6 @@ craft target book = case getRecipes (item target) book of
       craftedInputs <- if null inputTrees then [[]] else sequence inputTrees
       pure $ Tree target craftedInputs
 
-
 --------------------------------------------------------------------------------
 
 type CraftStage = [ItemStack]
@@ -73,13 +72,13 @@ type CraftStage = [ItemStack]
 craftStages :: Forest ItemStack -> [CraftStage]
 craftStages = mapToLayers . pointersToMap . forestToPointers
    where
-   insertIndex :: Indexed ItemStack -> Map String (Indexed ItemStack) -> Map String (Indexed ItemStack)
+   insertIndex :: Indexed ItemStack -> Map Item (Indexed ItemStack) -> Map Item (Indexed ItemStack)
    insertIndex idx = Map.alter (Just . maybe idx (mergeIndices max (+) idx)) (item $ value idx)
    
-   mapToLayers :: Map String (Indexed ItemStack) -> [CraftStage]
+   mapToLayers :: Map Item (Indexed ItemStack) -> [CraftStage]
    mapToLayers = map (map value) . groupOn index . sortOn index . Map.elems
 
-   pointersToMap :: [Indexed ItemStack] -> Map String (Indexed ItemStack)
+   pointersToMap :: [Indexed ItemStack] -> Map Item (Indexed ItemStack)
    pointersToMap = foldr insertIndex Map.empty
 
    forestToPointers :: Forest ItemStack -> [Indexed ItemStack]
