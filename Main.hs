@@ -18,13 +18,13 @@ import qualified Data.Map.Strict as Map
 
 type CraftTree = Tree ItemStack
 
-craft :: ItemStack -> RecipeBook -> [CraftTree]
+craft :: (Monad m, RecipeRepo r m) => ItemStack -> r -> m CraftTree
 craft target book = do
-   recipe <- getRecipes (item target) book
+   recipe <- getRecipe (item target) book
    let targetInputQuantity = \input -> (quantity input) * (quantity target) / (quantity $ output recipe)
    let craftInput = \input -> craft (input {quantity = targetInputQuantity input}) book
-   let inputTrees = map craftInput $ inputs recipe :: [[CraftTree]]
-   craftedInputs <- if null inputTrees then [[]] else sequence inputTrees
+   let inputTrees = map craftInput $ inputs recipe
+   craftedInputs <- if null inputTrees then pure [] else sequence inputTrees
    pure $ Tree target craftedInputs
 
 --------------------------------------------------------------------------------

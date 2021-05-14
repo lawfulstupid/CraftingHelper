@@ -1,9 +1,11 @@
 {-# LANGUAGE LambdaCase #-}
+{-# LANGUAGE MultiParamTypeClasses #-}
 
-module CraftingHelper.Data.RecipeSelector where
+module CraftingHelper.Data.RecipeSelector (RecipeSelector(..)) where
 
 import CraftingHelper.Data.ItemStack
 import CraftingHelper.Data.Recipe
+import CraftingHelper.Data.RecipeRepo
 import CraftingHelper.Data.RecipeBook
 
 import AbLib.Data.List
@@ -11,21 +13,32 @@ import AbLib.Data.IO
 
 import Control.Monad
 import Data.IORef
+import Data.Maybe
 
 import Data.Map.Strict (Map)
 import qualified Data.Map.Strict as Map
 
 --------------------------------------------------------------------------------
 
-newtype RecipeSelector = RS (Map Item (IORef RecipeSelectorUnit))
+newtype RecipeSelector = RS RecipeSelector'
+type RecipeSelector' = Map Item (IORef RecipeSelectorUnit)
 data RecipeSelectorUnit = RecipeSelectorUnit
    { options :: [Recipe]
    , selection :: Maybe Recipe }
 
 --------------------------------------------------------------------------------
 
+instance RecipeRepo RecipeSelector IO where
+   make file = do
+      book <- make file
+      makeRecipeSelector book
+   getRecipe item selector = do
+      maybeRecipe <- selectRecipe item selector
+      guard (isJust maybeRecipe)
+      pure $ fromJust maybeRecipe
+
 makeRecipeSelector :: RecipeBook -> IO RecipeSelector
-makeRecipeSelector b = RS <$> (sequenceMap $ Map.map makeUnit b)
+makeRecipeSelector (RB m) = RS <$> (sequenceMap $ Map.map makeUnit m)
    where
    makeUnit :: [Recipe] -> IO (IORef RecipeSelectorUnit)
    makeUnit rs = newIORef $ RecipeSelectorUnit rs Nothing
@@ -63,5 +76,5 @@ selectRecipe = getFromMap
       k <- getKey
       let idx = if ('0' <= k && k <= '9') then read [k] - 1 else -1
       case recipes !? idx of
-         Just r -> pure $ Just r
+         Just r -> putStrLn (k:"\n") >> pure (Just r)
          Nothing -> putStrLn "invalid, try again\n" >> getFromUser recipes
