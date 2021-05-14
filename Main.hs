@@ -10,6 +10,7 @@ import AbLib.Control.Parser
 import AbLib.Control.ParserUtils
 import AbLib.Data.Tree
 import AbLib.Data.List
+import AbLib.Data.Indexed
 
 import GHC.IO
 import Data.Maybe
@@ -68,29 +69,23 @@ craft target book = case getRecipes (item target) book of
 --------------------------------------------------------------------------------
 
 type CraftStage = [ItemStack]
-data StagePointer = StagePointer
-   { stage :: Int
-   , stack :: ItemStack }
 
 craftStages :: Forest ItemStack -> [CraftStage]
 craftStages = mapToLayers . pointersToMap . forestToPointers
    where
-   insertStagePointer :: StagePointer -> Map String StagePointer -> Map String StagePointer
-   insertStagePointer ptr = Map.alter (Just . maybe ptr (mergePointers ptr)) (item $ stack ptr)
+   insertIndex :: Indexed ItemStack -> Map String (Indexed ItemStack) -> Map String (Indexed ItemStack)
+   insertIndex idx = Map.alter (Just . maybe idx (mergeIndices max (+) idx)) (item $ value idx)
    
-   mergePointers :: StagePointer -> StagePointer -> StagePointer
-   mergePointers (StagePointer stage1 stack1) (StagePointer stage2 stack2) = StagePointer (max stage1 stage2) (stack1 + stack2)
-   
-   mapToLayers :: Map String StagePointer -> [CraftStage]
-   mapToLayers = map (map stack) . groupOn stage . sortOn stage . Map.elems
+   mapToLayers :: Map String (Indexed ItemStack) -> [CraftStage]
+   mapToLayers = map (map value) . groupOn index . sortOn index . Map.elems
 
-   pointersToMap :: [StagePointer] -> Map String StagePointer
-   pointersToMap = foldr insertStagePointer Map.empty
+   pointersToMap :: [Indexed ItemStack] -> Map String (Indexed ItemStack)
+   pointersToMap = foldr insertIndex Map.empty
 
-   forestToPointers :: Forest ItemStack -> [StagePointer]
+   forestToPointers :: Forest ItemStack -> [Indexed ItemStack]
    forestToPointers [] = []
    forestToPointers forest = let
       thisLayer = map node forest
       nextForest = foldMap branches forest
-      nextOutput = map (\ptr -> ptr {stage = stage ptr + 1}) $ forestToPointers nextForest
-      in map (StagePointer 0) thisLayer ++ nextOutput
+      nextOutput = map increment $ forestToPointers nextForest
+      in map (Index 0) thisLayer ++ nextOutput
