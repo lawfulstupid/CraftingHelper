@@ -32,3 +32,17 @@ instance Parse ItemStack where
 
       parseWord :: Parser String
       parseWord = greedy $ some letter
+
+qop :: (Quantity -> Quantity -> Quantity) -> ItemStack -> ItemStack -> ItemStack
+qop f (ItemStack i1 q1) (ItemStack i2 q2)
+   | i1 /= i2 = error "Mismatching stacks"
+   | otherwise = ItemStack i1 (f q1 q2)
+
+instance Num ItemStack where
+   (+) = qop (+)
+   (*) = qop (*)
+   (-) = qop (-)
+   abs = id
+   signum = const 1
+   fromInteger n = ItemStack "" $ fromInteger n
+   
