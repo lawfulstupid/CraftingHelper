@@ -47,8 +47,8 @@ loadRecipes file = do
    append :: Recipe -> Maybe [Recipe] -> Maybe [Recipe]
    append r rs = Just (r : fromMaybe [] rs)
 
-getRecipes :: Item -> RecipeBook -> Maybe [Recipe]
-getRecipes targetItem book = simplifyOptions <$> Map.lookup targetItem book
+getRecipes :: Item -> RecipeBook -> [Recipe]
+getRecipes targetItem book = simplifyOptions $ concat $ maybeToList $ Map.lookup targetItem book
    where
    simplifyOptions :: [Recipe] -> [Recipe]
    simplifyOptions rs = let
@@ -56,15 +56,13 @@ getRecipes targetItem book = simplifyOptions <$> Map.lookup targetItem book
       in if null zeroCost then rs else zeroCost
 
 craft :: ItemStack -> RecipeBook -> [CraftTree]
-craft target book = case getRecipes (item target) book of
-   Nothing -> []
-   Just recipes -> do
-      recipe <- recipes
-      let targetInputQuantity = \input -> (quantity input) * (quantity target) / (quantity $ output recipe)
-      let craftInput = \input -> craft (input {quantity = targetInputQuantity input}) book
-      let inputTrees = map craftInput $ inputs recipe :: [[CraftTree]]
-      craftedInputs <- if null inputTrees then [[]] else sequence inputTrees
-      pure $ Tree target craftedInputs
+craft target book = do
+   recipe <- getRecipes (item target) book
+   let targetInputQuantity = \input -> (quantity input) * (quantity target) / (quantity $ output recipe)
+   let craftInput = \input -> craft (input {quantity = targetInputQuantity input}) book
+   let inputTrees = map craftInput $ inputs recipe :: [[CraftTree]]
+   craftedInputs <- if null inputTrees then [[]] else sequence inputTrees
+   pure $ Tree target craftedInputs
 
 --------------------------------------------------------------------------------
 
