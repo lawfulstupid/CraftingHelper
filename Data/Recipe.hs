@@ -28,7 +28,7 @@ instance Parse Recipe where
       maybeRate <- optional parseRate
       let qMult = maybe 1 (/ quantity output) maybeRate
       let qAlt = \s -> s {quantity = qMult * quantity s}
-      pure $ Recipe (map qAlt inputs) (qAlt output)
+      pure $ Recipe (sort $ map qAlt inputs) (qAlt output)
       
       where
       parseItemStackList :: Parser [ItemStack]

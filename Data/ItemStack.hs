@@ -23,6 +23,12 @@ instance Show ItemStack where
 instance Read ItemStack where
    readsPrec _ = parseS
 
+instance Eq ItemStack where
+   ItemStack i1 q1 == ItemStack i2 q2 = (i1,q1) == (i2,q2)
+
+instance Ord ItemStack where
+   compare (ItemStack i1 q1) (ItemStack i2 q2) = compare (i1,q1) (i2,q2)
+
 instance Parse ItemStack where
    parser = do
       c <- peek next
