@@ -8,6 +8,8 @@ import CraftingHelper.Data.RecipeRepo
 
 import AbLib.Control.Parser
 
+import Control.Monad
+import Debug.Trace
 import Data.Char
 import Data.Maybe
 
@@ -28,10 +30,16 @@ instance RecipeRepo RecipeBook [] where
 loadRecipes :: FilePath -> IO RecipeBook
 loadRecipes file = do
    content <- fmap lines $ readFile file
-   let recipes = preprocess content >>= return . parse :: [Recipe]
+   let recipes = preprocess content >>= parseRecipes
    pure $ RB $ foldr aux Map.empty recipes
    
    where
+   parseRecipes :: String -> [Recipe]
+   parseRecipes line = do
+      let rs = parseM line
+      when (null rs) $ traceM ("INVALID RECIPE: " ++ line);
+      rs
+   
    preprocess :: [String] -> [String]
    preprocess lines = do
       line <- lines
