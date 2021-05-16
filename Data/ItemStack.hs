@@ -20,6 +20,9 @@ data ItemStack = ItemStack
 instance Show ItemStack where
    show (ItemStack s n) = show (fromRational n) ++ " " ++ s
 
+instance Read ItemStack where
+   readsPrec _ = parseS
+
 instance Parse ItemStack where
    parser = do
       c <- peek next
