@@ -1,3 +1,4 @@
+{-# LANGUAGE FlexibleInstances #-}
 
 module CraftingHelper.Data.ItemStack where
 
@@ -54,4 +55,11 @@ instance Num ItemStack where
    abs = id
    signum = const 1
    fromInteger n = ItemStack "" $ fromInteger n
-   
+
+instance Num (String -> ItemStack) where
+   (+) = undefined
+   (*) = undefined
+   (-) = undefined
+   abs = undefined
+   signum = undefined
+   fromInteger n = \s -> ItemStack s $ fromInteger n
