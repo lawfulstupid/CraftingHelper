@@ -34,7 +34,7 @@ instance RecipeRepo RecipeSelector IO where
       makeRecipeSelector book
    getRecipe item selector = do
       maybeRecipe <- selectRecipe item selector
-      guard (isJust maybeRecipe)
+      unless (isJust maybeRecipe) $ errorWithoutStackTrace ("No recipe for " ++ item)
       pure $ fromJust maybeRecipe
 
 makeRecipeSelector :: RecipeBook -> IO RecipeSelector
