@@ -19,11 +19,11 @@ import qualified Data.Map.Strict as Map
 
 type CraftTree = Tree ItemStack
 
-craft :: (Monad m, RecipeRepo r m) => ItemStack -> r -> m CraftTree
-craft target book = do
+craft :: (Monad m, RecipeRepo r m) => r -> ItemStack-> m CraftTree
+craft book target = do
    recipe <- getRecipe (item target) book
    let targetInputQuantity = \input -> (quantity input) * (quantity target) / (quantity $ output recipe)
-   let craftInput = \input -> craft (input {quantity = targetInputQuantity input}) book
+   let craftInput = \input -> craft book (input {quantity = targetInputQuantity input})
    let inputTrees = map craftInput $ inputs recipe
    craftedInputs <- if null inputTrees then pure [] else sequence inputTrees
    pure $ Tree target craftedInputs
@@ -58,9 +58,7 @@ printStages forest = forM_ (zip [1..] $ reverse $ craftStages forest) $ \(stage,
    forM_ materials print
    putStrLn ""
 
-fullPlan :: FilePath -> [ItemStack] -> IO ()
-fullPlan file targets = do
-   selector <- make file :: IO RecipeSelector
-   forest <- sequence $ map (flip craft selector) targets
+fullPlan :: RecipeSelector -> [ItemStack] -> IO ()
+fullPlan selector targets = do
+   forest <- sequence $ map (craft selector) targets
    printStages forest
-   
