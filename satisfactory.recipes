@@ -1,19 +1,33 @@
-# BASIC INPUTS
-=> 1 Steel Beam
-=> 1 Steel Pipe
-=> 1 Concrete
-=> 1 Iron Plate
-=> 1 Screw
-=> 1 Iron Rod
-=> 1 Wire
-=> 1 Cable
-=> 1 Copper Sheet
-=> 1 Rubber
-=> 1 Plastic
-=> 1 Raw Quartz
+# GIVEN INPUTS
+=> 1 Rubber @1
+=> 1 Plastic @1
 
-# REFERENCE
+# ORES
+=> 1 Copper Ore @30
+=> 1 Iron Ore @30
+=> 1 Limestone @30
+=> 1 Coal @30
+#=> 1 Sulphur @30
+5 Coal + 5 Sulphur => 5 Compacted Coal @25
+
+# BASIC METALS
+1 Copper Ore => 1 Copper Ingot @30
+1 Copper Ore + 4 Water => 15 Copper Ingot @37.5
+10 Copper Ore + 5 Iron Ore => 20 Copper Ingot @100
+2 Copper Ingot => 1 Copper Sheet @10
+1 Iron Ingot => 1 Iron Rod @15
+3 Iron Ingot => 1 Iron Plate @20
+3 Iron Ingot + 3 Coal => 3 Steel Ingot @45
+6 Iron Ingot + 3 Compacted Coal => 10 Steel Ingot @37.5
+
+# BASIC METAL PRODUCTS
 1 Iron Rod => 4 Screw @40
+1 Copper Ingot => 1 Wire @30
+1 Caterium Ingot => 8 Wire @120
+4 Copper Ingot + 1 Caterium Ingot => 30 Wire @90
+3 Limestone => 1 Concrete @15
+4 Steel Ingot => 1 Steel Beam @15
+3 Steel Ingot => 2 Steel Pipe @20
 
 # GOALS
 1 Modular Frame + 12 Steel Beam => 2 Versatile Framework @5
@@ -33,6 +47,7 @@
 3 Caterium Ore => 1 Caterium Ingot @15
 
 # ELECTRONICS PARTS
+2 Wire => 1 Cable @30
 10 Circuit Board + 9 Cable + 18 Plastic + 52 Screw => 1 Computer @2.5
 2 Copper Sheet + 4 Plastic => 1 Circuit Board @7.5
 1 Stator + 20 Cable => 1 Automated Wiring @2.5
