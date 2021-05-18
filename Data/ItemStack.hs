@@ -63,3 +63,7 @@ instance Num (String -> ItemStack) where
    abs = undefined
    signum = undefined
    fromInteger n = \s -> ItemStack s $ fromInteger n
+
+instance Fractional (String -> ItemStack) where
+   (/) = undefined
+   fromRational r = \s -> ItemStack s r
