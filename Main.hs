@@ -11,6 +11,7 @@ import AbLib.Data.Indexed
 
 import Control.Monad
 import Data.List
+import Data.Maybe
 
 import Data.Map.Strict (Map)
 import qualified Data.Map.Strict as Map
@@ -61,4 +62,20 @@ printStages forest = forM_ (zip [1..] $ reverse $ craftStages forest) $ \(stage,
 fullPlan :: RecipeSelector -> [ItemStack] -> IO ()
 fullPlan selector targets = do
    forest <- sequence $ map (craft selector) targets
-   printStages forest
+   forest' <- removeTrivialBranches forest
+   printStages forest'
+   where
+   
+   removeTrivialBranches :: Forest ItemStack -> IO (Forest ItemStack)
+   removeTrivialBranches trees = do
+      list <- sequence $ map removeTrivialTree trees
+      pure $ catMaybes list
+   
+   removeTrivialTree :: Tree ItemStack -> IO (Maybe (Tree ItemStack))
+   removeTrivialTree (Tree x b) = do
+      recipe <- getRecipe (item x) selector
+      if null $ inputs recipe
+      then pure Nothing
+      else do
+         b' <- removeTrivialBranches b
+         pure $ Just $ Tree x b'
