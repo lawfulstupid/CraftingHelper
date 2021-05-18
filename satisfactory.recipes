@@ -11,6 +11,8 @@
 5 Coal + 5 Sulphur => 5 Compacted Coal @25
 
 # BASIC METALS
+1 Iron Ore => 1 Iron Ingot @30
+2 Iron Ore + 2 Copper Ore => 5 Iron Ingot @50
 1 Copper Ore => 1 Copper Ingot @30
 1 Copper Ore + 4 Water => 15 Copper Ingot @37.5
 10 Copper Ore + 5 Iron Ore => 20 Copper Ingot @100
@@ -21,6 +23,7 @@
 6 Iron Ingot + 3 Compacted Coal => 10 Steel Ingot @37.5
 
 # BASIC METAL PRODUCTS
+5 Iron Ingot => 20 Screw @50
 1 Iron Rod => 4 Screw @40
 1 Copper Ingot => 1 Wire @30
 1 Caterium Ingot => 8 Wire @120
